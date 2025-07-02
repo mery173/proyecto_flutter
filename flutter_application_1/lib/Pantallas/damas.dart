@@ -21,20 +21,36 @@ class _DamasScreenState extends State<DamasScreen> {
   }
 
   Future<void> cargarProductosDamas() async {
+    List<String> categorias = [
+      'womens-dresses',
+      'womens-shoes',
+      'womens-watches',
+      'womens-bags',
+      'tops',
+    ];
+
+    List allProducts = [];
+
     try {
-      final response = await http.get(
-        Uri.parse('https://api.escuelajs.co/api/v1/categories/1/products'),
-      );
-      if (response.statusCode == 200) {
-        setState(() {
-          productos = json.decode(response.body);
-          cargando = false;
-        });
-      } else {
-        setState(() => cargando = false);
+      for (var categoria in categorias) {
+        final response = await http.get(
+          Uri.parse('https://dummyjson.com/products/category/$categoria'),
+        );
+
+        if (response.statusCode == 200) {
+          var data = json.decode(response.body);
+          allProducts.addAll(data['products']);
+        }
       }
+
+      setState(() {
+        productos = allProducts;
+        cargando = false;
+      });
     } catch (_) {
-      setState(() => cargando = false);
+      setState(() {
+        cargando = false;
+      });
     }
   }
 
@@ -54,7 +70,7 @@ class _DamasScreenState extends State<DamasScreen> {
               ),
               itemCount: productos.length,
               itemBuilder: (_, i) => ProductCard(
-                imageUrl: productos[i]['images'][0],
+                imageUrl: productos[i]['thumbnail'],
                 title: productos[i]['title'],
                 precio:
                     double.tryParse(productos[i]['price'].toString()) ?? 0.0,
