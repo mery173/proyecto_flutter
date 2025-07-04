@@ -40,7 +40,7 @@ class MiCuentaScreen extends StatelessWidget {
               usuario.correo.isNotEmpty
                   ? usuario.correo
                   : 'Sin correo registrado',
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
+              style: const TextStyle(fontSize: 16, color: Color.fromARGB(255, 65, 63, 63)),
             ),
             const SizedBox(height: 20),
 
@@ -74,10 +74,10 @@ class MiCuentaScreen extends StatelessWidget {
 
             ElevatedButton.icon(
               icon: const Icon(Icons.add_circle_outline),
-              label: const Text('Recargar S/ 50'),
+              label: const Text('Recargar S/ 100'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 148, 148, 236),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromARGB(255, 133, 132, 132),
+                foregroundColor: const Color.fromARGB(255, 212, 212, 212),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,

@@ -69,7 +69,7 @@ class ProductCard extends StatelessWidget {
                 Text(
                   'S/ ${precio.toStringAsFixed(2)}',
                   style: const TextStyle(
-                    color: Color.fromARGB(255, 90, 51, 158),
+                    color: Color.fromARGB(255, 63, 63, 63),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -79,8 +79,8 @@ class ProductCard extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 148, 148, 236),
-                      foregroundColor: Colors.white,
+                      backgroundColor: const Color.fromARGB(255, 77, 77, 77),
+                      foregroundColor: const Color.fromARGB(255, 253, 250, 250),
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -114,7 +114,7 @@ class ProductCard extends StatelessWidget {
                     },
                     child: const Text(
                       'Agregar',
-                      style: TextStyle(fontSize: 13),
+                      style: TextStyle(fontSize: 17),
                     ),
                   ),
                 ),

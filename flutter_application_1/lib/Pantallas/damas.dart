@@ -77,7 +77,7 @@ class _DamasScreenState extends State<DamasScreen> {
               ),
             ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromARGB(255, 51, 51, 145),
+        backgroundColor: const Color.fromARGB(255, 95, 95, 95),
         onPressed: () {
           Navigator.push(
             context,

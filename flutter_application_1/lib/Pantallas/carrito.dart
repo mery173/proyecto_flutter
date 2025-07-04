@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../Providers/carrito_provider.dart';
 import '../Providers/usuario_provider.dart';
-import 'resumen_compra.dart';
+import '../Ventanas/confirmarcompra.dart';
 
 class CarritoScreen extends StatelessWidget {
   const CarritoScreen({super.key});
@@ -17,7 +17,7 @@ class CarritoScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Carrito de Compras'),
         centerTitle: true,
-        backgroundColor: const Color(0xFFB3B3FF),
+        backgroundColor: const Color.fromARGB(255, 78, 78, 78),
       ),
       body: productos.isEmpty
           ? const Center(
@@ -50,7 +50,7 @@ class CarritoScreen extends StatelessWidget {
       bottomNavigationBar: productos.isNotEmpty
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              color: Colors.white,
+              color: const Color.fromARGB(255, 15, 15, 15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -59,26 +59,28 @@ class CarritoScreen extends StatelessWidget {
                       double totalCarrito = carrito.totalCarrito();
 
                       if (usuario.logueado) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ResumenCompraScreen(
-                              nombre: usuario.nombre,
-                              saldo: usuario.saldo,
-                              total: totalCarrito,
-                              productos: carrito.carrito,
-                            ),
+                        showDialog(
+                          context: context,
+                          builder: (_) => ConfirmarCompraDialog(
+                            nombre: usuario.nombre,
+                            correo: usuario.correo,
+                            total: totalCarrito,
+                            productos: carrito.carrito,
                           ),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Debes iniciar sesión para comprar')),
+                          const SnackBar(
+                            content: Text('Debes iniciar sesión para comprar'),
+                          ),
                         );
                       }
                     },
                     icon: const Icon(Icons.shopping_bag),
                     label: const Text('Comprar'),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
                   ),
                   ElevatedButton.icon(
                     onPressed: () {
@@ -89,7 +91,9 @@ class CarritoScreen extends StatelessWidget {
                     },
                     icon: const Icon(Icons.delete),
                     label: const Text('Vaciar'),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
                   ),
                 ],
               ),

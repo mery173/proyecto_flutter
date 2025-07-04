@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../Componentes/producto.dart';
 import '../Componentes/categorias.dart';
@@ -77,15 +79,51 @@ class _TiendaInicioState extends State<TiendaInicio> {
     showDialog(context: context, builder: (_) => const DialogLogin());
   }
 
+  Future<void> _eliminarCuenta(
+    BuildContext context,
+    UsuarioProvider usuarioProvider,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .delete();
+
+        await user.delete();
+
+        usuarioProvider.logout();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cuenta eliminada exitosamente')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al eliminar cuenta: ${e.toString()}'),
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final usuario = Provider.of<UsuarioProvider>(context);
     final pedidoProvider = Provider.of<PedidoProvider>(context);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Tienda Rápida'),
+        backgroundColor: const Color(0xFF757575),
+        title: const Text('LooksGreat'),
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
@@ -99,7 +137,7 @@ class _TiendaInicioState extends State<TiendaInicio> {
             TextButton(
               onPressed: () => _mostrarLogin(context),
               style: TextButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 179, 179, 243),
+                backgroundColor: const Color.fromARGB(255, 80, 80, 80),
                 foregroundColor: Colors.white,
               ),
               child: const Text('Iniciar sesión'),
@@ -107,12 +145,11 @@ class _TiendaInicioState extends State<TiendaInicio> {
         ],
       ),
       drawer: Drawer(
+        backgroundColor: const Color(0xFFFAFAFA),
         child: ListView(
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 179, 179, 243),
-              ),
+              decoration: const BoxDecoration(color: Color(0xFF757575)),
               child: usuario.logueado
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,58 +173,36 @@ class _TiendaInicioState extends State<TiendaInicio> {
                       style: TextStyle(color: Colors.white),
                     ),
             ),
-            ListTile(
-              leading: const Icon(Icons.shopping_cart),
-              title: const Text('Carrito'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CarritoScreen()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.list_alt),
-              title: const Text('Mis pedidos'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MisPedidosScreen()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Mi cuenta'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MiCuentaScreen()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('Sobre nosotros'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SobreNosotrosScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.help_outline),
-              title: const Text('Ayuda'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AyudaScreen()),
-                );
-              },
-            ),
+            _buildDrawerItem(Icons.shopping_cart, 'Carrito', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CarritoScreen()),
+              );
+            }),
+            _buildDrawerItem(Icons.list_alt, 'Mis pedidos', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MisPedidosScreen()),
+              );
+            }),
+            _buildDrawerItem(Icons.person, 'Mi cuenta', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MiCuentaScreen()),
+              );
+            }),
+            _buildDrawerItem(Icons.info_outline, 'Sobre nosotros', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SobreNosotrosScreen()),
+              );
+            }),
+            _buildDrawerItem(Icons.help_outline, 'Ayuda', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AyudaScreen()),
+              );
+            }),
             if (usuario.logueado)
               ListTile(
                 leading: const Icon(Icons.logout),
@@ -218,6 +233,41 @@ class _TiendaInicioState extends State<TiendaInicio> {
                   );
                 },
               ),
+            if (usuario.logueado)
+              ListTile(
+                leading: const Icon(Icons.delete_forever, color: Colors.red),
+                title: const Text(
+                  'Eliminar cuenta',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Eliminar cuenta'),
+                      content: const Text(
+                        '¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancelar'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _eliminarCuenta(context, usuario);
+                          },
+                          child: const Text(
+                            'Eliminar',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
           ],
         ),
       ),
@@ -234,7 +284,7 @@ class _TiendaInicioState extends State<TiendaInicio> {
                       padding: const EdgeInsets.all(12),
                       margin: const EdgeInsets.only(top: 8),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 240, 240, 255),
+                        color: const Color(0xFFE0E0E0),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -266,7 +316,7 @@ class _TiendaInicioState extends State<TiendaInicio> {
                           width: MediaQuery.of(context).size.width * 0.9,
                           height: 200,
                           child: Image.asset(
-                            'assets/images/promociones/bannertt.jpg',
+                            'assets/images/promociones/banertt.jpg',
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -276,10 +326,11 @@ class _TiendaInicioState extends State<TiendaInicio> {
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      'Promociones:',
+                      '¡Tu estilo es único!',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 0, 0, 0),
                       ),
                     ),
                   ),
@@ -311,7 +362,11 @@ class _TiendaInicioState extends State<TiendaInicio> {
                   const SizedBox(height: 20),
                   const Text(
                     'Categorías',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 32, 31, 31),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Padding(
@@ -361,6 +416,7 @@ class _TiendaInicioState extends State<TiendaInicio> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 26, 25, 25),
                       ),
                     ),
                   ),
@@ -400,13 +456,24 @@ class _TiendaInicioState extends State<TiendaInicio> {
               ),
             ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromARGB(255, 51, 51, 145),
+        backgroundColor: const Color.fromARGB(255, 182, 38, 38),
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const CarritoScreen()),
         ),
-        child: const Icon(Icons.shopping_cart, color: Colors.white),
+        child: const Icon(
+          Icons.shopping_cart,
+          color: Color.fromARGB(255, 236, 233, 233),
+        ),
       ),
+    );
+  }
+
+  ListTile _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: const Color.fromARGB(255, 79, 79, 80)),
+      title: Text(title, style: const TextStyle(color: Color(0xFF757575))),
+      onTap: onTap,
     );
   }
 }

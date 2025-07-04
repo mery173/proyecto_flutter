@@ -19,8 +19,8 @@ class CategoryItem extends StatelessWidget {
       child: Column(
         children: [
           CircleAvatar(
-            backgroundColor: const Color.fromARGB(255, 181, 181, 224),
-            child: Icon(icon, color: const Color.fromARGB(255, 75, 47, 122)),
+            backgroundColor: const Color.fromARGB(255, 190, 190, 190),
+            child: Icon(icon, color: const Color.fromARGB(255, 78, 78, 78)),
           ),
           const SizedBox(height: 6),
           Text(label),

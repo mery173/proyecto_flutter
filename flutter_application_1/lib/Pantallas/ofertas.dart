@@ -59,7 +59,7 @@ class _OfertasScreenState extends State<OfertasScreen> {
 
       //  Botón flotante del carrito
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromARGB(255, 51, 51, 145),
+        backgroundColor: const Color.fromARGB(255, 94, 94, 95),
         onPressed: () {
           Navigator.push(
             context,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../Providers/usuario_provider.dart';
 
@@ -15,25 +17,52 @@ class _DialogRegistroState extends State<DialogRegistro> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  void _registrar() {
+  Future<void> _registrar() async {
     final nombre = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    Provider.of<UsuarioProvider>(context, listen: false).registrar(
-      nombre,
-      email,
-      password,
-    );
+    try {
+      // Crear usuario en Firebase Auth
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
-    Navigator.of(context).pop();
+      // Guardar datos en Firestore
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(userCredential.user!.uid)
+          .set({
+            'nombre': nombre,
+            'email': email,
+            'createdAt': Timestamp.now(),
+          });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Registro exitoso. ¡Bienvenido!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+      // 👉 Actualizar provider local
+      Provider.of<UsuarioProvider>(context, listen: false).login(nombre, email);
+
+      // Cerrar modal y mostrar éxito
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registro exitoso. ¡Bienvenido!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -49,21 +78,18 @@ class _DialogRegistroState extends State<DialogRegistro> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Nombre'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Ingrese su nombre' : null,
+                validator: (value) => value!.isEmpty ? 'Ingrese su nombre' : null,
               ),
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Correo'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Ingrese su correo' : null,
+                validator: (value) => value!.isEmpty ? 'Ingrese su correo' : null,
               ),
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(labelText: 'Contraseña'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Ingrese su contraseña' : null,
+                validator: (value) => value!.isEmpty ? 'Ingrese su contraseña' : null,
               ),
             ],
           ),
@@ -76,8 +102,8 @@ class _DialogRegistroState extends State<DialogRegistro> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromARGB(255, 130, 130, 223),
-            foregroundColor: Colors.white,
+            backgroundColor: const Color.fromARGB(255, 75, 75, 177),
+            foregroundColor: const Color.fromARGB(255, 219, 219, 219),
           ),
           onPressed: () {
             if (_formKey.currentState!.validate()) {

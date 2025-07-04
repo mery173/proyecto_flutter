@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../Providers/usuario_provider.dart';
-import 'package:flutter_application_1/Pantallas/registro.dart'; // 👈 Importa el nuevo dialog de registro
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/Pantallas/registro.dart'; // 👈 Dialog de registro
 
 class DialogLogin extends StatefulWidget {
   const DialogLogin({super.key});
@@ -15,27 +17,48 @@ class _DialogLoginState extends State<DialogLogin> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  void _login() {
+  /// 👉 Método para iniciar sesión con Firebase
+  Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // ⚡ Ejemplo básico: validar con un usuario fijo
-    if (email == 'admin@tienda.com' && password == '1234') {
-      Provider.of<UsuarioProvider>(
-        context,
-        listen: false,
-      ).login('Admin', 200.0);
+    try {
+      // ✅ Autenticarse con Firebase Auth
+      final userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      // ✅ Obtener datos adicionales desde Firestore
+      final doc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(userCredential.user!.uid)
+          .get();
+
+      final nombre = doc.data()?['nombre'] ?? 'Usuario';
+
+      // ✅ Actualizar Provider local
+      Provider.of<UsuarioProvider>(context, listen: false).login(nombre, email);
+
       Navigator.of(context).pop();
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Inicio de sesión correcta'),
+          content: Text('Inicio de sesión correcto'),
           backgroundColor: Colors.green,
         ),
       );
-    } else {
+    } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Correo o contraseña incorrectos')),
+        SnackBar(
+          content: Text('Error: ${e.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -72,7 +95,7 @@ class _DialogLoginState extends State<DialogLogin> {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
-            // 👇 Abre el dialog de registro
+            // 👉 Abre el diálogo de registro
             showDialog(
               context: context,
               builder: (_) => const DialogRegistro(),
@@ -82,8 +105,8 @@ class _DialogLoginState extends State<DialogLogin> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromARGB(255, 130, 130, 223),
-            foregroundColor: Colors.white,
+            backgroundColor: const Color.fromARGB(255, 133, 230, 95),
+            foregroundColor: const Color.fromARGB(255, 7, 7, 7),
           ),
           onPressed: () {
             if (_formKey.currentState!.validate()) {

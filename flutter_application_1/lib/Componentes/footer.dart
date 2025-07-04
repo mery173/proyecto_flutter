@@ -34,7 +34,7 @@ class Footer extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: const [
-              Icon(Icons.facebook, size: 28, color: Colors.blueAccent),
+              Icon(Icons.facebook, size: 28, color: Color.fromARGB(255, 42, 110, 228)),
               SizedBox(width: 10),
               SizedBox(width: 10),
               Icon(Icons.tiktok, size: 28, color: Colors.black),

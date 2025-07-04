@@ -21,7 +21,7 @@ class ResumenCompraScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Resumen de Compra'),
-        backgroundColor: const Color(0xFFB3B3FF),
+        backgroundColor: const Color.fromARGB(255, 78, 78, 78),
         centerTitle: true,
       ),
       body: Padding(
