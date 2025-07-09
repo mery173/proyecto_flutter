@@ -19,35 +19,43 @@ class _DialogRegistroState extends State<DialogRegistro> {
 
   Future<void> _registrar() async {
     final nombre = _nameController.text.trim();
-    final email = _emailController.text.trim();
+    final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text.trim();
 
     try {
-      // Crear usuario en Firebase Auth
+      // ✅ Crear usuario en Firebase Auth
       final userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      // Guardar datos en Firestore
+      final user = userCredential.user;
+      if (user == null) throw Exception("Usuario no encontrado");
+
+      // ✅ Guardar datos adicionales en Firestore con UID
       await FirebaseFirestore.instance
           .collection('usuarios')
-          .doc(userCredential.user!.uid)
+          .doc(user.uid)
           .set({
             'nombre': nombre,
-            'email': email,
+            'correo': email,
+            'saldo': 0.0, // 👈 saldo inicial en 0
             'createdAt': Timestamp.now(),
           });
 
-      // 👉 Actualizar provider local
-      Provider.of<UsuarioProvider>(context, listen: false).login(nombre, email);
+      // ✅ Actualizar Provider local
+      Provider.of<UsuarioProvider>(context, listen: false)
+          .login(user.uid, nombre, email, 0.0);
 
-      // Cerrar modal y mostrar éxito
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registro exitoso. ¡Bienvenido!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // ✅ Cerrar modal y mostrar éxito
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registro exitoso. ¡Bienvenido!'),
+            backgroundColor: Colors.green,
+            duration: Duration(milliseconds: 1500),
+          ),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -66,6 +74,14 @@ class _DialogRegistroState extends State<DialogRegistro> {
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Registrarse'),
@@ -78,18 +94,21 @@ class _DialogRegistroState extends State<DialogRegistro> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Nombre'),
-                validator: (value) => value!.isEmpty ? 'Ingrese su nombre' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingrese su nombre' : null,
               ),
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Correo'),
-                validator: (value) => value!.isEmpty ? 'Ingrese su correo' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingrese su correo' : null,
               ),
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(labelText: 'Contraseña'),
-                validator: (value) => value!.isEmpty ? 'Ingrese su contraseña' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingrese su contraseña' : null,
               ),
             ],
           ),

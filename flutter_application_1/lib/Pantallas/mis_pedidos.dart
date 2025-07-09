@@ -10,11 +10,14 @@ class MisPedidosScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final usuario = Provider.of<UsuarioProvider>(context);
 
+    print('Correo actual en UsuarioProvider: ${usuario.correo}');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis Pedidos'),
         backgroundColor: const Color(0xFF757575),
       ),
+      backgroundColor: const Color(0xFFFAFAFA),
       body: !usuario.logueado
           ? const Center(
               child: Text('Debes iniciar sesión para ver tus pedidos'),
@@ -22,7 +25,7 @@ class MisPedidosScreen extends StatelessWidget {
           : StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('pedidos')
-                  .where('correo', isEqualTo: usuario.correo)
+                  .where('correo', isEqualTo: usuario.correo.trim().toLowerCase())
                   .orderBy('fecha', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
@@ -54,22 +57,11 @@ class MisPedidosScreen extends StatelessWidget {
                         ),
                         children: productos.map((prod) {
                           return ListTile(
-                            leading:
-                                prod['imagen'].toString().startsWith('http')
-                                ? Image.network(
-                                    prod['imagen'],
-                                    width: 40,
-                                    height: 40,
-                                  )
-                                : Image.asset(
-                                    prod['imagen'],
-                                    width: 40,
-                                    height: 40,
-                                  ),
+                            leading: prod['imagen'].toString().startsWith('http')
+                                ? Image.network(prod['imagen'], width: 40, height: 40)
+                                : Image.asset(prod['imagen'], width: 40, height: 40),
                             title: Text(prod['titulo']),
-                            subtitle: Text(
-                              'S/ ${prod['precio'].toStringAsFixed(2)}',
-                            ),
+                            subtitle: Text('S/ ${prod['precio'].toStringAsFixed(2)}'),
                           );
                         }).toList(),
                       ),

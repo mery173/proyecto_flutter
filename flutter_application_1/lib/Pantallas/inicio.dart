@@ -86,19 +86,46 @@ class _TiendaInicioState extends State<TiendaInicio> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
+      final uid = user.uid;
+
       try {
+        // ✅ Borrar todos los pedidos del usuario
+        final pedidosSnapshot = await FirebaseFirestore.instance
+            .collection('pedidos')
+            .where('uid', isEqualTo: uid)
+            .get();
+
+        for (var doc in pedidosSnapshot.docs) {
+          await doc.reference.delete();
+        }
+
+        // ✅ Borrar documento del usuario
         await FirebaseFirestore.instance
             .collection('usuarios')
-            .doc(user.uid)
+            .doc(uid)
             .delete();
 
+        // ✅ Eliminar usuario en Auth
         await user.delete();
 
+        // ✅ Logout local
         usuarioProvider.logout();
 
+        // ✅ Limpiar pedidos locales en Provider
+        final pedidoProvider = Provider.of<PedidoProvider>(
+          context,
+          listen: false,
+        );
+        pedidoProvider.limpiarPedidos();
+
         if (mounted) {
+          Navigator.of(context).pop(); // cerrar diálogo
+          Navigator.of(context).popUntil((route) => route.isFirst);
+
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Cuenta eliminada exitosamente')),
+            const SnackBar(
+              content: Text('Cuenta y pedidos eliminados exitosamente'),
+            ),
           );
         }
       } catch (e) {
@@ -255,7 +282,6 @@ class _TiendaInicioState extends State<TiendaInicio> {
                         ),
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pop();
                             _eliminarCuenta(context, usuario);
                           },
                           child: const Text(

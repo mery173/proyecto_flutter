@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../Providers/usuario_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/Pantallas/registro.dart'; // 👈 Dialog de registro
+import 'package:flutter_application_1/Pantallas/registro.dart';
 
 class DialogLogin extends StatefulWidget {
   const DialogLogin({super.key});
@@ -17,9 +17,8 @@ class _DialogLoginState extends State<DialogLogin> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  /// 👉 Método para iniciar sesión con Firebase
   Future<void> _login() async {
-    final email = _emailController.text.trim();
+    final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text.trim();
 
     try {
@@ -27,25 +26,33 @@ class _DialogLoginState extends State<DialogLogin> {
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      // ✅ Obtener datos adicionales desde Firestore
+      final user = userCredential.user;
+      if (user == null) throw Exception("Usuario no encontrado");
+
+      // ✅ Obtener datos adicionales desde Firestore usando UID
       final doc = await FirebaseFirestore.instance
           .collection('usuarios')
-          .doc(userCredential.user!.uid)
+          .doc(user.uid)
           .get();
 
       final nombre = doc.data()?['nombre'] ?? 'Usuario';
+      final correo = doc.data()?['correo'] ?? email;
+      final saldo = (doc.data()?['saldo'] ?? 0).toDouble();
 
       // ✅ Actualizar Provider local
-      Provider.of<UsuarioProvider>(context, listen: false).login(nombre, email);
+      Provider.of<UsuarioProvider>(context, listen: false)
+          .login(user.uid, nombre, correo, saldo);
 
-      Navigator.of(context).pop();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Inicio de sesión correcto'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Inicio de sesión correcto ✅'),
+            backgroundColor: Colors.green,
+            duration: Duration(milliseconds: 1500),
+          ),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -61,6 +68,13 @@ class _DialogLoginState extends State<DialogLogin> {
         ),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -81,8 +95,7 @@ class _DialogLoginState extends State<DialogLogin> {
               controller: _passwordController,
               obscureText: true,
               decoration: const InputDecoration(labelText: 'Contraseña'),
-              validator: (value) =>
-                  value!.isEmpty ? 'Ingrese su contraseña' : null,
+              validator: (value) => value!.isEmpty ? 'Ingrese su contraseña' : null,
             ),
           ],
         ),
@@ -95,7 +108,6 @@ class _DialogLoginState extends State<DialogLogin> {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
-            // 👉 Abre el diálogo de registro
             showDialog(
               context: context,
               builder: (_) => const DialogRegistro(),

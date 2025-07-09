@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'Firebase/firebase_options.dart';
 
 // providers
 import 'Providers/carrito_provider.dart';
@@ -39,28 +39,24 @@ class MyTiendaApp extends StatelessWidget {
           0xFFFAFAFA,
         ), // ✅ Blanco suave global
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF757575), 
+          backgroundColor: Color(0xFF757575),
           foregroundColor: Colors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.black,
-            backgroundColor: Colors.white, 
+            backgroundColor: Colors.white,
           ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.black, 
-          ),
+          style: TextButton.styleFrom(foregroundColor: Colors.black),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.black, 
-          ),
+          style: OutlinedButton.styleFrom(foregroundColor: Colors.black),
         ),
         colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: const Color(0xFF757575), 
-          secondary: const Color(0xFF757575), 
+          primary: const Color(0xFF757575),
+          secondary: const Color(0xFF757575),
         ),
       ),
       home: const TiendaInicio(),

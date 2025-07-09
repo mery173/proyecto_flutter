@@ -8,7 +8,7 @@ class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String title;
   final double precio;
-  final VoidCallback? onAdd; // 👉 Callback opcional
+  final VoidCallback? onAdd; // Callback opcional para acciones extra
 
   const ProductCard({
     super.key,
@@ -40,9 +40,7 @@ class ProductCard extends StatelessWidget {
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
@@ -80,7 +78,7 @@ class ProductCard extends StatelessWidget {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 77, 77, 77),
-                      foregroundColor: const Color.fromARGB(255, 253, 250, 250),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -88,6 +86,7 @@ class ProductCard extends StatelessWidget {
                     ),
                     onPressed: () {
                       if (!usuario.logueado) {
+                        // Si no ha iniciado sesión, muestra el diálogo
                         showDialog(
                           context: context,
                           builder: (_) => const DialogLogin(),
@@ -95,20 +94,23 @@ class ProductCard extends StatelessWidget {
                         return;
                       }
 
-                      // ✅ Usuario logueado: agrega al carrito
+                      // Usuario logueado: agregar al carrito
                       carrito.agregarProducto({
                         'image': imageUrl,
                         'title': title,
                         'precio': precio,
                       });
 
+                      // Ejecutar callback adicional si se definió
                       if (onAdd != null) {
                         onAdd!();
                       }
 
+                      // Mostrar mensaje de éxito
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Producto agregado al carrito'),
+                          duration: Duration(seconds: 2),
                         ),
                       );
                     },

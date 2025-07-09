@@ -28,19 +28,15 @@ class _ConfirmarCompraDialogState extends State<ConfirmarCompraDialog> {
     try {
       await FirebaseFirestore.instance.collection('pedidos').add({
         'nombre': widget.nombre,
-        'correo': widget.correo
-            .trim()
-            .toLowerCase(), // ✅ Normalizamos el correo
+        'correo': widget.correo.trim().toLowerCase(), // ✅ Normalizamos
         'total': widget.total,
         'metodoPago': metodoPago,
         'productos': widget.productos
-            .map(
-              (e) => {
-                'titulo': e['title'],
-                'precio': e['precio'],
-                'imagen': e['image'],
-              },
-            )
+            .map((e) => {
+                  'titulo': e['title'],
+                  'precio': e['precio'],
+                  'imagen': e['image'],
+                })
             .toList(),
         'fecha': Timestamp.now(),
       });
@@ -55,7 +51,7 @@ class _ConfirmarCompraDialogState extends State<ConfirmarCompraDialog> {
           ),
         );
 
-        Navigator.of(context).pop(); // Cerrar el dialog
+        Navigator.of(context).pop(); // Cierra el dialog
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -76,7 +72,7 @@ class _ConfirmarCompraDialogState extends State<ConfirmarCompraDialog> {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, // Ajusta al contenido
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Center(
               child: Text(
@@ -86,9 +82,7 @@ class _ConfirmarCompraDialogState extends State<ConfirmarCompraDialog> {
             ),
             const SizedBox(height: 10),
             Text('Nombre: ${widget.nombre}'),
-            Text(
-              'Correo: ${widget.correo.trim().toLowerCase()}',
-            ), // ✅ Mostramos normalizado también
+            Text('Correo: ${widget.correo.trim().toLowerCase()}'), // ✅ Mostramos normalizado
             const SizedBox(height: 10),
             const Text(
               'Productos:',
