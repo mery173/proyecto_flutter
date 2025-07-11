@@ -13,38 +13,43 @@ class EditarDatosScreen extends StatefulWidget {
 class _EditarDatosScreenState extends State<EditarDatosScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nombreController;
+  late TextEditingController _correoController;
 
   @override
   void initState() {
     super.initState();
     final usuario = Provider.of<UsuarioProvider>(context, listen: false);
     _nombreController = TextEditingController(text: usuario.nombre);
+    _correoController = TextEditingController(text: usuario.correo);
   }
 
   @override
   void dispose() {
     _nombreController.dispose();
+    _correoController.dispose();
     super.dispose();
   }
 
   Future<void> _actualizarDatos() async {
     final nuevoNombre = _nombreController.text.trim();
+    final nuevoCorreo = _correoController.text.trim();
     if (!_formKey.currentState!.validate()) return;
 
     final usuario = Provider.of<UsuarioProvider>(context, listen: false);
 
     try {
-      // ✅ Actualizar nombre en Firestore usando UID
+      // ✅ Actualizar en Firestore usando UID
       await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(usuario.uid)
           .update({
             'nombre': nuevoNombre,
+            'correo': nuevoCorreo,
             'updatedAt': Timestamp.now(),
           });
 
-      // ✅ Actualizar en Provider
-      usuario.login(usuario.uid, nuevoNombre, usuario.correo, usuario.saldo);
+      // ✅ Actualizar Provider local
+      usuario.login(usuario.uid, nuevoNombre, nuevoCorreo, usuario.saldo);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -64,8 +69,6 @@ class _EditarDatosScreenState extends State<EditarDatosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final usuario = Provider.of<UsuarioProvider>(context, listen: false);
-
     return Scaffold(
       appBar: AppBar(title: const Text('Editar datos')),
       body: Padding(
@@ -82,9 +85,10 @@ class _EditarDatosScreenState extends State<EditarDatosScreen> {
               ),
               const SizedBox(height: 10),
               TextFormField(
-                initialValue: usuario.correo,
-                enabled: false,
+                controller: _correoController,
                 decoration: const InputDecoration(labelText: 'Correo'),
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingrese su correo' : null,
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(

@@ -13,7 +13,6 @@ import '../Ventanas/login.dart';
 import 'damas.dart';
 import 'caballeros.dart';
 import 'ofertas.dart';
-import 'mis_pedidos.dart';
 import 'mi_cuenta.dart';
 import 'sobre_nosotros.dart';
 import 'ayuda.dart';
@@ -206,12 +205,6 @@ class _TiendaInicioState extends State<TiendaInicio> {
                 MaterialPageRoute(builder: (_) => const CarritoScreen()),
               );
             }),
-            _buildDrawerItem(Icons.list_alt, 'Mis pedidos', () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MisPedidosScreen()),
-              );
-            }),
             _buildDrawerItem(Icons.person, 'Mi cuenta', () {
               Navigator.push(
                 context,
@@ -300,187 +293,187 @@ class _TiendaInicioState extends State<TiendaInicio> {
       body: cargando
           ? const Center(child: CircularProgressIndicator())
           : error
-          ? const Center(child: Text('Error al cargar productos 😢'))
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  if (usuario.logueado)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.only(top: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0E0E0),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '👤 ${usuario.nombre}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+              ? const Center(child: Text('Error al cargar productos 😢'))
+              : SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (usuario.logueado)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(top: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E0E0),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          Text(
-                            'Saldo: S/ ${usuario.saldo.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '👤 ${usuario.nombre}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                'Saldo: S/ ${usuario.saldo.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: 200,
-                          child: Image.asset(
-                            'assets/images/promociones/banertt.jpg',
-                            fit: BoxFit.cover,
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              height: 200,
+                              child: Image.asset(
+                                'assets/images/promociones/banertt.jpg',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      '¡Tu estilo es único!',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 0, 0, 0),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          '¡Tu estilo es único!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 0, 0, 0),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: promociones.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: promociones.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3,
                             crossAxisSpacing: 10,
                             mainAxisSpacing: 10,
                             childAspectRatio: 0.8,
                           ),
-                      itemBuilder: (context, index) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: Image.asset(
-                            promociones[index],
-                            fit: BoxFit.cover,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Categorías',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 32, 31, 31),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Wrap(
-                      spacing: 30,
-                      runSpacing: 10,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        CategoryItem(
-                          icon: Icons.woman,
-                          label: 'Damas',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const DamasScreen(),
-                            ),
-                          ),
+                          itemBuilder: (context, index) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.asset(
+                                promociones[index],
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          },
                         ),
-                        CategoryItem(
-                          icon: Icons.man,
-                          label: 'Caballeros',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const CaballerosScreen(),
-                            ),
-                          ),
-                        ),
-                        CategoryItem(
-                          icon: Icons.shopping_bag,
-                          label: 'Ofertas',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const OfertasScreen(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'Productos:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 26, 25, 25),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: productos.length > 12 ? 12 : productos.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Categorías',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 32, 31, 31),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: Wrap(
+                          spacing: 30,
+                          runSpacing: 10,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            CategoryItem(
+                              icon: Icons.woman,
+                              label: 'Damas',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const DamasScreen(),
+                                ),
+                              ),
+                            ),
+                            CategoryItem(
+                              icon: Icons.man,
+                              label: 'Caballeros',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const CaballerosScreen(),
+                                ),
+                              ),
+                            ),
+                            CategoryItem(
+                              icon: Icons.shopping_bag,
+                              label: 'Ofertas',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const OfertasScreen(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Productos:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 26, 25, 25),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: productos.length > 12 ? 12 : productos.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             crossAxisSpacing: 10,
                             mainAxisSpacing: 10,
                             childAspectRatio: 0.8,
                           ),
-                      itemBuilder: (context, index) {
-                        final producto = productos[index];
-                        return ProductCard(
-                          imageUrl: producto['images'][0],
-                          title: producto['title'],
-                          precio:
-                              double.tryParse(producto['price'].toString()) ??
-                              0.0,
-                          onAdd: () => pedidoProvider.agregarPedido(
-                            double.tryParse(producto['price'].toString()) ??
-                                0.0,
-                          ),
-                        );
-                      },
-                    ),
+                          itemBuilder: (context, index) {
+                            final producto = productos[index];
+                            return ProductCard(
+                              imageUrl: producto['images'][0],
+                              title: producto['title'],
+                              precio:
+                                  double.tryParse(producto['price'].toString()) ??
+                                      0.0,
+                              onAdd: () => pedidoProvider.agregarPedido(
+                                double.tryParse(producto['price'].toString()) ??
+                                    0.0,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      const Footer(),
+                    ],
                   ),
-                  const SizedBox(height: 30),
-                  const Footer(),
-                ],
-              ),
-            ),
+                ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color.fromARGB(255, 182, 38, 38),
         onPressed: () => Navigator.push(

@@ -40,8 +40,10 @@ class _DialogLoginState extends State<DialogLogin> {
       final saldo = (doc.data()?['saldo'] ?? 0).toDouble();
 
       // ✅ Actualizar Provider local
-      Provider.of<UsuarioProvider>(context, listen: false)
-          .login(user.uid, nombre, correo, saldo);
+      Provider.of<UsuarioProvider>(
+        context,
+        listen: false,
+      ).login(user.uid, nombre, correo, saldo);
 
       if (mounted) {
         Navigator.of(context).pop();
@@ -54,11 +56,17 @@ class _DialogLoginState extends State<DialogLogin> {
         );
       }
     } on FirebaseAuthException catch (e) {
+      String mensaje = '';
+      if (e.code == 'user-not-found') {
+        mensaje = 'La cuenta no está registrada.';
+      } else if (e.code == 'wrong-password') {
+        mensaje = 'Contraseña incorrecta.';
+      } else {
+        mensaje = 'Error: ${e.message}';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.message}'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(mensaje), backgroundColor: Colors.red),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -95,7 +103,8 @@ class _DialogLoginState extends State<DialogLogin> {
               controller: _passwordController,
               obscureText: true,
               decoration: const InputDecoration(labelText: 'Contraseña'),
-              validator: (value) => value!.isEmpty ? 'Ingrese su contraseña' : null,
+              validator: (value) =>
+                  value!.isEmpty ? 'Ingrese su contraseña' : null,
             ),
           ],
         ),
@@ -115,17 +124,30 @@ class _DialogLoginState extends State<DialogLogin> {
           },
           child: const Text('Registrarse'),
         ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromARGB(255, 133, 230, 95),
-            foregroundColor: const Color.fromARGB(255, 7, 7, 7),
+        SizedBox(
+          width: double
+              .infinity, // ✅ Hace que el botón ocupe todo el ancho posible
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 133, 230, 95),
+              foregroundColor: const Color.fromARGB(255, 7, 7, 7),
+              padding: const EdgeInsets.symmetric(
+                vertical: 15,
+              ), // ✅ Alto consistente
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8), // ✅ Bordes redondeados
+              ),
+            ),
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                _login();
+              }
+            },
+            child: const Text(
+              'Entrar',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              _login();
-            }
-          },
-          child: const Text('Entrar'),
         ),
       ],
     );
